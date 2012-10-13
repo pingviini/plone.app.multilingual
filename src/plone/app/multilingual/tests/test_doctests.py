@@ -6,9 +6,9 @@ from plone.app.multilingual.testing import (
     PLONEAPPMULTILINGUAL_FUNCTIONAL_TESTING,
     optionflags,
 )
-integration_tests = [
-    'vocabularies.txt'
-]
+
+
+integration_tests = ['vocabularies.txt']
 functional_tests = [
     'form.txt',
     'menu.txt',

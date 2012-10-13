@@ -8,7 +8,6 @@ from plone.app.multilingual.browser.vocabularies import (
     deletable_languages,
     addTranslation
 )
-from plone.formwidget.contenttree import ObjPathSourceBinder
 from plone.directives import form
 from z3c.relationfield.schema import RelationChoice
 

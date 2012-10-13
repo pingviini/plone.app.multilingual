@@ -82,7 +82,8 @@ class MultilingualEditForm(DefaultEditForm):
             if '.' in field:
                 schemaname, fieldname = field.split('.')
                 for schema in self.additionalSchemata:
-                    if schemaname == schema.__identifier__ and fieldname in schema:
+                    if schemaname == schema.__identifier__ and\
+                        fieldname in schema:
                         if ILanguageIndependentField.providedBy(\
                             schema[fieldname]):
                             self.widgets[field].addClass('languageindependent')

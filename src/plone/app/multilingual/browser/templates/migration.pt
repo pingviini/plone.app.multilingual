@@ -28,23 +28,23 @@
   <div id="region-content" class="documentEditable">
 
     <div id="edit-bar" i18n:domain="plone.app.multilingual">
-        <ul class="contentViews" id="content-views">
-          <li>
-            <a href=""
-               tal:attributes="href string:${portal_url}/@@language-controlpanel"
-               i18n:translate="label_general">General</a>
-          </li>
-          <li>
-            <a href=""
-               tal:attributes="href string:${portal_url}/@@multilingual-map"
-               i18n:translate="label_translation_map">Translation Map</a>
-          </li>
-          <li class="selected">
-            <a href=""
-               tal:attributes="href string:${portal_url}/@@lp-migration"
-               i18n:translate="label_migration">Migration</a>
-          </li>
-        </ul>
+      <ul class="contentViews" id="content-views">
+        <li>
+          <a href=""
+             tal:attributes="href string:${portal_url}/@@language-controlpanel"
+             i18n:translate="label_general">General</a>
+        </li>
+        <li>
+          <a href=""
+             tal:attributes="href string:${portal_url}/@@multilingual-map"
+             i18n:translate="label_translation_map">Translation Map</a>
+        </li>
+        <li class="selected">
+          <a href=""
+             tal:attributes="href string:${portal_url}/@@lp-migration"
+             i18n:translate="label_migration">Migration</a>
+        </li>
+      </ul>
     </div>
 
     <div class="contentActions">
