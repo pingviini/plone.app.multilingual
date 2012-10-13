@@ -18,13 +18,37 @@ class migrationLPToPAM(unittest.TestCase):
         language_tool = getToolByName(self.portal, 'portal_languages')
         language_tool.addSupportedLanguage('ca')
         language_tool.addSupportedLanguage('es')
+        self.createLinguaPloneStructure()
+
+    def createLinguaPloneStructure(self):
+        self.folder = makeContent(self.portal, 'Folder', id='folder')
+        self.folder.setLanguage('en')
+        self.folder_ca = makeTranslation(self.folder, 'ca')
+        self.folder_es = makeTranslation(self.folder, 'es')
 
         self.doc1 = makeContent(self.portal, 'Document', id='doc1')
         self.doc1.setLanguage('en')
         self.doc1_ca = makeTranslation(self.doc1, 'ca')
-        self.doc1_ca.edit(title="Foo", language='ca')
+        self.doc1_ca.edit(title="Foo-ca", language='ca')
         self.doc1_es = makeTranslation(self.doc1, 'es')
-        self.doc1_es.edit(title="Foo", language='es')
+        self.doc1_es.edit(title="Foo-es", language='es')
+
+        self.doc2 = makeContent(self.folder, 'Document', id='doc2')
+        self.doc2.setLanguage('en')
+        self.doc2_ca = makeTranslation(self.doc2, 'ca')
+        self.doc2_ca.edit(title="Bar-ca", language='ca')
+        self.doc2_es = makeTranslation(self.doc2, 'es')
+        self.doc2_es.edit(title="Bar-es", language='es')
+
+        self.doc3 = makeContent(self.folder_ca, 'Document', id='doc3')
+        self.doc3.setLanguage('ca')
+        self.doc3_es = makeTranslation(self.doc3, 'es')
+        self.doc3_es.edit(title="Woot", language="es")
+
+        self.doc4 = makeContent(self.folder_es, 'Document', id='doc4')
+        self.doc4.setLanguage('es')
+        self.doc4_en = makeTranslation(self.doc4, 'en')
+        self.doc4_en.edit(title="Woot woot", language="en")
 
     def testSupportedLanguages(self):
         language_tool = getToolByName(self.portal, 'portal_languages')
@@ -39,3 +63,21 @@ class migrationLPToPAM(unittest.TestCase):
                          {'ca': self.doc1_ca,
                           'en': self.doc1,
                           'es': self.doc1_es})
+
+        self.assertEqual(ITranslationManager(self.folder).get_translations(),
+                         {'ca': self.folder_ca,
+                          'en': self.folder,
+                          'es': self.folder_es})
+
+        self.assertEqual(ITranslationManager(self.doc2).get_translations(),
+                         {'ca': self.doc2_ca,
+                          'en': self.doc2,
+                          'es': self.doc2_es})
+
+        self.assertEqual(ITranslationManager(self.doc3).get_translations(),
+                         {'ca': self.doc3,
+                          'es': self.doc3_es})
+
+        self.assertEqual(ITranslationManager(self.doc4).get_translations(),
+                         {'en': self.doc4_en,
+                          'es': self.doc4})
