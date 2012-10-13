@@ -23,7 +23,6 @@ class migrationLPToPAM(unittest.TestCase):
         language_tool = getToolByName(self.portal, 'portal_languages')
         language_tool.addSupportedLanguage('ca')
         language_tool.addSupportedLanguage('es')
-        self.createLinguaPloneStructure()
 
     def createLinguaPloneStructure(self):
         self.folder = makeContent(self.portal, 'Folder', id='folder')
@@ -61,6 +60,7 @@ class migrationLPToPAM(unittest.TestCase):
                         ['en', 'ca', 'es'])
 
     def testMigration(self):
+        self.createLinguaPloneStructure()
         migration_view = getMultiAdapter((self.portal, self.request),
                                          name='migration-view')
         migration_view()
@@ -88,12 +88,12 @@ class migrationLPToPAM(unittest.TestCase):
                           'es': self.doc4})
 
     def testRelocator(self):
-        self.doc1 = makeContent(self.portal, 'Document', id='doc2')
-        self.doc1.setLanguage('en')
-        self.doc1_ca = makeTranslation(self.doc1, 'ca')
-        self.doc1_ca.edit(title="Foo", language='ca')
-        self.doc1_es = makeTranslation(self.doc1, 'es')
-        self.doc1_es.edit(title="Foo", language='es')
+        self.doc5 = makeContent(self.portal, 'Document', id='doc5')
+        self.doc5.setLanguage('en')
+        self.doc5_ca = makeTranslation(self.doc5, 'ca')
+        self.doc5_ca.edit(title="Foo", language='ca')
+        self.doc5_es = makeTranslation(self.doc5, 'es')
+        self.doc5_es.edit(title="Foo", language='es')
         workflowTool = getToolByName(self.portal, "portal_workflow")
         workflowTool.setDefaultChain('simple_publication_workflow')
         setupTool = SetupMultilingualSite()
@@ -103,6 +103,6 @@ class migrationLPToPAM(unittest.TestCase):
                                           name='relocateContentByLanguage')
         relocator_view()
 
-        self.assertTrue(getattr(self.portal.en, 'doc2', False))
-        self.assertTrue(getattr(self.portal.es, 'doc2-es', False))
-        self.assertTrue(getattr(self.portal.ca, 'doc2-ca', False))
+        self.assertTrue(getattr(self.portal.en, 'doc5', False))
+        self.assertTrue(getattr(self.portal.es, 'doc5-es', False))
+        self.assertTrue(getattr(self.portal.ca, 'doc5-ca', False))
