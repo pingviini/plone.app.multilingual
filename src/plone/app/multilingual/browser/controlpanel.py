@@ -1,41 +1,35 @@
+import json
+
 from zope.interface import Interface
 from zope.interface import implementsOnly
 from zope.schema import Choice
 from zope.schema import Bool, List
-from Products.statusmessages.interfaces import IStatusMessage
-from zope.component import getMultiAdapter
-from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
-from Products.Five import BrowserView
-
-from plone.app.form.validators import null_validator
-
-from plone.fieldsets.fieldsets import FormFieldsets
-
+from zope.component import getMultiAdapter, getUtility
 from zope.formlib import form
 from zope.schema.vocabulary import SimpleVocabulary, SimpleTerm
+from zope.schema.interfaces import IVocabularyFactory
+from zope.i18nmessageid import MessageFactory
 
+from Products.statusmessages.interfaces import IStatusMessage
+from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from Products.Five import BrowserView
+from Products.CMFCore.utils import getToolByName
+from Products.CMFPlone import PloneMessageFactory as _Plone
+
+from plone.app.form.validators import null_validator
 from plone.app.controlpanel.language import LanguageControlPanel as BasePanel
 from plone.app.controlpanel.language import LanguageControlPanelAdapter
+from plone.app.uuid.utils import uuidToObject
 from plone.app.multilingual.browser.setup import SetupMultilingualSite
 from plone.app.multilingual.interfaces import IMultiLanguageExtraOptionsSchema
-from plone.protect import CheckAuthenticator
-
-from zope.component import getUtility
-from plone.registry.interfaces import IRegistry
-from Products.CMFCore.utils import getToolByName
-
-from zope.schema.interfaces import IVocabularyFactory
-
-from plone.app.uuid.utils import uuidToObject
-from plone.uuid.interfaces import IUUID
-
-import json
-
 from plone.app.multilingual import isLPinstalled
-from plone.multilingual.interfaces import IMultilingualStorage, ITranslationManager, ILanguage
 
-from Products.CMFPlone import PloneMessageFactory as _Plone
-from zope.i18nmessageid import MessageFactory
+from plone.fieldsets.fieldsets import FormFieldsets
+from plone.protect import CheckAuthenticator
+from plone.registry.interfaces import IRegistry
+from plone.multilingual.interfaces import IMultilingualStorage, ILanguage
+
+
 _ = MessageFactory('plone.app.multilingual')
 
 
@@ -180,9 +174,14 @@ class IMultiLanguageOptionsSchema(Interface):
         required=False,
         )
 
+
 selector_policies = SimpleVocabulary(
-    [SimpleTerm(value=u'closest', title=_(u'Search for closest translation in parent\'s content chain.')),
-     SimpleTerm(value=u'dialog', title=_(u'Show user dialog with information about the available translations.'))
+    [SimpleTerm(value=u'closest',
+                title=_(u'Search for closest translation in parent\'s content '
+                        u'chain.')),
+     SimpleTerm(value=u'dialog',
+                title=_(u'Show user dialog with information about the '
+                        u'available translations.'))
     ]
 )
 
@@ -193,8 +192,9 @@ class IMultiLanguagePolicies(Interface):
 
     selector_lookup_translations_policy = Choice(
         title=_(u"heading_selector_lookup_translations_policy",
-                default=u"The policy used to determine how the lookup for available "
-                         "translations will be made by the language selector."),
+                default=u"The policy used to determine how the lookup for "
+                        u"available translations will be made by the language "
+                        u"selector."),
         description=_(u"description_selector_lookup_translations_policy",
                       default=u"The default language used for the content "
                               u"and the UI of this site."),
@@ -364,8 +364,9 @@ class MultiLanguagePoliciesAdapter(LanguageControlPanelAdapter):
     def set_selector_lookup_translations_policy(self, value):
         self.settings.selector_lookup_translations_policy = value
 
-    selector_lookup_translations_policy = property(get_selector_lookup_translations_policy,
-                                                   set_selector_lookup_translations_policy)
+    selector_lookup_translations_policy = property(
+            get_selector_lookup_translations_policy,
+            set_selector_lookup_translations_policy)
 
 selection = FormFieldsets(IMultiLanguageSelectionSchema)
 selection.label = _(u'Site Languages')
@@ -473,7 +474,8 @@ class multilingualMapViewJSON(BrowserView):
             root = root.getPortalObject()
             folder_path = '/'.join(root.getPhysicalPath())
 
-        self.request.response.setHeader("Content-type", "application/json; charset=utf-8")
+        self.request.response.setHeader("Content-type",
+                                        "application/json; charset=utf-8")
         pcatalog = getToolByName(self.context, 'portal_catalog')
         query = {}
         query['path'] = {'query': folder_path, 'depth': 1}
@@ -481,7 +483,8 @@ class multilingualMapViewJSON(BrowserView):
         query['sort_order'] = "ascending"
         query['Language'] = lang
         search_results = pcatalog.searchResults(query)
-        resultat = {'id': 'root', 'name': folder_path, 'data': {}, 'children': []}
+        resultat = {'id': 'root', 'name': folder_path, 'data': {},
+                    'children': []}
         # Get the canonicals
         storage = getUtility(IMultilingualStorage)
         canonicals = storage.get_canonicals()
@@ -495,13 +498,19 @@ class multilingualMapViewJSON(BrowserView):
                 for lang in supported_languages:
                     if lang in canonical.get_keys():
                         translated_obj = uuidToObject(canonical.get_item(lang))
-                        translations[lang] = {'url': translated_obj.absolute_url(), 'title': translated_obj.getId()}
+                        translations[lang] = {
+                                'url': translated_obj.absolute_url(),
+                                'title': translated_obj.getId()}
                     else:
-                        url_to_create = sr.getURL() + "/@@create_translation?form.widgets.language"\
-                            "=%s&form.buttons.create=1" % lang
-                        translations[lang] = {'url': url_to_create, 'title': _(u'Not translated')}
+                        url_to_create = "%s/@@create_translation?form.widgets.\
+language=%s&form.buttons.create=1" % (sr.getURL(), lang)
+                        translations[lang] = {'url': url_to_create,
+                                              'title': _(u'Not translated')}
             if get_all:
-                resultat['children'].append({'id': sr['UID'], 'name': sr['Title'], 'data': translations, 'children': []})
+                resultat['children'].append({'id': sr['UID'],
+                                             'name': sr['Title'],
+                                             'data': translations,
+                                             'children': []})
             else:
                 pass
         return json.dumps(resultat)
@@ -512,13 +521,16 @@ class multilingualMapView(BrowserView):
     __call__ = ViewPageTemplateFile('templates/mmap.pt')
 
     def languages(self):
-        langs = getUtility(IVocabularyFactory, name=u"plone.app.multilingual.vocabularies.AllAvailableLanguageVocabulary")
+        langs = getUtility(IVocabularyFactory,
+                           name=u"plone.app.multilingual.vocabularies."
+                                u"AllAvailableLanguageVocabulary")
         tool = getToolByName(self.context, 'portal_languages', None)
         lang = tool.getDefaultLanguage()
         return {'default': lang, 'languages': langs(self.context)}
 
     def canonicals(self):
-        """ We get all the canonicals and see which translations are missing """
+        """ We get all the canonicals and see which translations are missing
+        """
         # Get the language
         tool = getToolByName(self.context, 'portal_languages', None)
         languages = tool.getSupportedLanguages()
@@ -532,15 +544,19 @@ class multilingualMapView(BrowserView):
         for canonical in canonicals.keys():
             canonical_object = canonicals[canonical]
             canonical_languages = canonical_object.get_keys()
-            if len(canonical_languages) < num_lang and id(canonical_object) not in already_added_canonicals:
-                missing_languages = [lang for lang in languages if lang not in canonical_languages]
+            if len(canonical_languages) < num_lang and\
+                    id(canonical_object) not in already_added_canonicals:
+                missing_languages = [lang for lang in languages if\
+                                     lang not in canonical_languages]
                 translations = []
                 last_url = ''
                 for canonical_language in canonical_languages:
-                    obj = uuidToObject(canonical_object.get_item(canonical_language))
+                    obj = uuidToObject(canonical_object.get_item(
+                            canonical_language))
                     last_url = obj.absolute_url()
                     translations.append({'url': obj.absolute_url(),
-                                         'path': '/'.join(obj.getPhysicalPath()),
+                                         'path':
+                                            '/'.join(obj.getPhysicalPath()),
                                          'lang': canonical_language})
                 already_added_canonicals.append(id(canonical_object))
                 not_full_translations.append({'id': canonical,
